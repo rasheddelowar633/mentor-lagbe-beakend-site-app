@@ -1,0 +1,29 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "**Smart Tuition & Mentorship Platform** — a role-based EdTech web app that connects verified tutors with students. Tutors post tuition batches, admins moderate listings, and students search, bookmark and apply for tuitions — with Stripe Pro subscriptions on top.",
+  "main": "src/server.js",
+"scripts": {
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@better-auth/mongo-adapter": "^1.7.25",
+    "better-auth": "^1.7.25",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "jose": "^6.2.17",
+    "mongodb": "^7.9.0",
+    "stripe": "^23.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
