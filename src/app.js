@@ -20,6 +20,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 
+import tuitionRoutes from "./routes/tuitionRoutes.js";
+
 const app = express();
 
 app.use(helmet());
@@ -41,10 +43,9 @@ app.use(express.json());
 app.use("/api/student", studentRoutes);
 app.use("/api/tutor", tutorRoutes);
 app.use("/api/admin", adminRoutes);
-
-// API Routes
 app.use("/api/users", userRoutes);
 app.use("/api/applications", applicationRoutes);
+app.use("/api/tuitions", tuitionRoutes);
 
 
 

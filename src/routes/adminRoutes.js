@@ -2,8 +2,7 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 
-import { db } from "../config/db.js";
-
+import { db, authDb } from "../config/db.js";
 
 import {
   verifyToken,
@@ -13,12 +12,115 @@ import {
 const router = express.Router();
 
 const batchesCollection = db.collection("tuitionBatches");
+const usersCollection = authDb.collection("user");
 
 // =====================================
 // COMMON ADMIN AUTHENTICATION
 // =====================================
 
 router.use(verifyToken, verifyAdmin);
+
+// =====================================
+// GET ADMIN DASHBOARD STATISTICS
+// GET /api/admin/stats
+// =====================================
+
+router.get("/stats", async (req, res) => {
+  try {
+    const [
+      totalUsers,
+      totalTutors,
+      pendingTuitions,
+      approvedTuitions,
+    ] = await Promise.all([
+      usersCollection.countDocuments({}),
+      usersCollection.countDocuments({ role: "tutor" }),
+      batchesCollection.countDocuments({ status: "pending" }),
+      batchesCollection.countDocuments({ status: "approved" }),
+    ]);
+
+    // Stripe revenue will be connected after confirming
+    // the payment collection structure.
+    const stripeRevenue = 0;
+
+    const stats = {
+      totalUsers,
+      totalTutors,
+      pendingTuitions,
+      approvedTuitions,
+      stripeRevenue,
+    };
+
+    res.status(200).json({
+      success: true,
+      stats,
+
+      // Top-level values are also provided for frontend compatibility.
+      ...stats,
+    });
+  } catch (error) {
+    console.error("Admin stats error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch admin statistics",
+    });
+  }
+});
+
+// =====================================
+// GET ALL TUITION BATCHES
+// GET /api/admin/tuitions
+// =====================================
+
+router.get("/tuitions", async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(
+      50,
+      Math.max(1, Number(req.query.limit) || 12)
+    );
+
+    const filter = {};
+
+    if (
+      status &&
+      ["pending", "approved", "rejected"].includes(status)
+    ) {
+      filter.status = status;
+    }
+
+    const total = await batchesCollection.countDocuments(filter);
+
+    const tuitions = await batchesCollection
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+
+    res.status(200).json({
+      success: true,
+      total,
+      page,
+      limit,
+      pages: Math.max(1, Math.ceil(total / limit)),
+
+      // Both names are provided for compatibility.
+      tuitions,
+      batches: tuitions,
+    });
+  } catch (error) {
+    console.error("Admin get tuitions error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch tuition batches",
+    });
+  }
+});
 
 // =====================================
 // GET ALL PENDING BATCHES
