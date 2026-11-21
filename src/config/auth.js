@@ -8,6 +8,15 @@ import { authDb } from "./db.js";
 export const auth = betterAuth({
   database: mongodbAdapter(authDb),
 
+  // Better Auth Debug Logger
+  logger: {
+    disabled: false,
+    level: "debug",
+    log: (level, message, ...args) => {
+      console.log(`[Better Auth ${level}] ${message}`, ...args);
+    },
+  },
+
   secret: process.env.BETTER_AUTH_SECRET,
 
   baseURL: process.env.BETTER_AUTH_URL,
@@ -75,15 +84,15 @@ export const auth = betterAuth({
   },
 
   plugins: [
-  jwt({
-    jwt: {
-      definePayload: ({ user }) => ({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        plan: user.plan,
-      }),
-    },
-  }),
-],
+    jwt({
+      jwt: {
+        definePayload: ({ user }) => ({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          plan: user.plan,
+        }),
+      },
+    }),
+  ],
 });

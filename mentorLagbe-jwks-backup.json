@@ -1,0 +1,10 @@
+[
+  {
+    "_id": "6afdd5b559775ae30caeefef",
+    "publicKey": "{\"crv\":\"Ed25519\",\"x\":\"7wlhGEdVcxVJtxKKWnYcANJZVUngFlWjcujOpH8rAbU\",\"kty\":\"OKP\"}",
+    "privateKey": "\"1b87a0977a2d754e60b209e9d15d1ab4cc845e4ff71fae6a415000b08b491eb4d4cd820c28af737f1b9918bc03e64d9f4824eb00a7d9397a34f6edb8fedd2fc6ec110ec25cf01044fb5ce57726ed81bf36e49504cdc07a1512a20868d4a537a7fc07ef5117c1de8d173664b9dec3fc886663a9a492bd3d667b4ecb909648c181672254e985c06ec552934c6ce00e3177fe381ce54549675d77627d6b0e56940b5863b908495a0b938e\"",
+    "createdAt": "2026-11-18T16:43:33.426Z",
+    "alg": "EdDSA",
+    "crv": "Ed25519"
+  }
+]

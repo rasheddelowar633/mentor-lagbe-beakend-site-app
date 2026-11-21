@@ -1,10 +1,53 @@
 
 import express from "express";
-import { ObjectId } from "mongodb";
 import { db } from "../config/db.js";
 import { verifyToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
+
+const usersCollection = db.collection("users");
+
+// =====================================
+// GET LOGGED-IN USER PROFILE
+// GET /api/users/me
+// =====================================
+
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const profile = await usersCollection.findOne(
+      { userId },
+      { projection: { _id: 0 } }
+    );
+
+    // If profile does not exist, return JWT user information.
+    const user = profile || {
+      userId: req.user.id,
+      name: req.user.name || "",
+      email: req.user.email,
+      role: req.user.role,
+      plan: req.user.plan || "free",
+      phone: "",
+      bio: "",
+      image: "",
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile loaded successfully.",
+      user,
+      profile: user,
+    });
+  } catch (error) {
+    console.error("Profile loading error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to load profile.",
+    });
+  }
+});
 
 // =====================================
 // UPDATE LOGGED-IN USER PROFILE
@@ -16,14 +59,17 @@ router.patch("/me", verifyToken, async (req, res) => {
     const { name, phone, bio, image } = req.body;
 
     // Validate name
-    if (typeof name !== "string" || !name.trim()) {
+    if (
+      name !== undefined &&
+      (typeof name !== "string" || !name.trim())
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Full name is required.",
+        message: "Invalid full name.",
       });
     }
 
-    if (name.trim().length > 100) {
+    if (typeof name === "string" && name.trim().length > 100) {
       return res.status(400).json({
         success: false,
         message: "Name cannot exceed 100 characters.",
@@ -63,19 +109,39 @@ router.patch("/me", verifyToken, async (req, res) => {
 
     const userId = req.user.id;
 
+    const existingProfile = await usersCollection.findOne({ userId });
+
     const profileData = {
       userId,
-      name: name.trim(),
       email: req.user.email,
       role: req.user.role,
       plan: req.user.plan || "free",
-      phone: typeof phone === "string" ? phone.trim() : "",
-      bio: typeof bio === "string" ? bio.trim() : "",
-      image: typeof image === "string" ? image.trim() : "",
       updatedAt: new Date(),
     };
 
-    const usersCollection = db.collection("users");
+    if (name !== undefined) {
+      profileData.name = name.trim();
+    } else if (!existingProfile) {
+      profileData.name = req.user.name || "";
+    }
+
+    if (phone !== undefined) {
+      profileData.phone = phone.trim();
+    } else if (!existingProfile) {
+      profileData.phone = "";
+    }
+
+    if (bio !== undefined) {
+      profileData.bio = bio.trim();
+    } else if (!existingProfile) {
+      profileData.bio = "";
+    }
+
+    if (image !== undefined) {
+      profileData.image = image.trim();
+    } else if (!existingProfile) {
+      profileData.image = "";
+    }
 
     await usersCollection.updateOne(
       { userId },
@@ -96,6 +162,7 @@ router.patch("/me", verifyToken, async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully.",
+      user: updatedProfile,
       profile: updatedProfile,
     });
   } catch (error) {
