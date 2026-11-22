@@ -21,6 +21,7 @@ import userRoutes from "./routes/userRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import tuitionRoutes from "./routes/tuitionRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import bookmarkRoutes from "./routes/bookmarkRoutes.js";
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/tuitions", tuitionRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/bookmarks", bookmarkRoutes);
 
 // Home route
 app.get("/", (req, res) => {
