@@ -2,6 +2,10 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import { db } from "../config/db.js";
+import {
+  verifyToken,
+  verifyTutor,
+} from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -122,6 +126,32 @@ router.get("/", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to load tuitions.",
+    });
+  }
+});
+
+// ==========================================
+// TUTOR: Get my own tuition batches
+// GET /api/tuitions/my
+// ==========================================
+router.get("/my", verifyToken, verifyTutor, async (req, res) => {
+  try {
+    const batches = await batchesCollection
+      .find({ tutorId: req.user.id })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.status(200).json({
+      success: true,
+      total: batches.length,
+      tuitions: batches.map(formatTuition),
+    });
+  } catch (error) {
+    console.error("Get my tuitions error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch your tuition posts.",
     });
   }
 });
