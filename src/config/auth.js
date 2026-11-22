@@ -25,6 +25,16 @@ export const auth = betterAuth({
     process.env.CLIENT_URL || "http://localhost:3000",
   ],
 
+  // Cross-site cookie configuration for production
+  advanced: {
+    useSecureCookies: true,
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      httpOnly: true,
+    },
+  },
+
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
